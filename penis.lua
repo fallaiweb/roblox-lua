@@ -1,63 +1,32 @@
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local player = Players.LocalPlayer
 
-local fly_enabled = false
-local godmode_enabled = false
-local invis_enabled = false
-local speed_enabled = false
-local ragdoll_enabled = false
-local superjump_enabled = false
-local mini_enabled = false
-local big_enabled = false
-local rainbow_enabled = false
+-- Feature-Status
+local features = {
+    {name="Fly",           key="F1",  enabled=false},
+    {name="Unsichtbar",    key="F2",  enabled=false},
+    {name="Godmode",       key="F3",  enabled=false},
+    {name="Speed Boost",   key="F4",  enabled=false},
+    {name="Ragdoll",       key="F5",  enabled=false},
+    {name="Super Jump",    key="F6",  enabled=false},
+    {name="Mini",          key="F7",  enabled=false},
+    {name="Big",           key="F8",  enabled=false},
+    {name="Regenbogen",    key="F9",  enabled=false},
+}
 
+-- Einstellungen
 local flySpeed = 60
 local speedBoost = 100
 local superJumpPower = 200
 local normalJumpPower = 50
 local bodyGyro, bodyVelocity = nil, nil
+local rainbowConnection = nil
+local flyConnection = nil
 
-local function createStatusGui()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "StatusGui"
-    screenGui.ResetOnSpawn = false
-    screenGui.Parent = player.PlayerGui
-
-    local statusLabel = Instance.new("TextLabel")
-    statusLabel.Name = "StatusLabel"
-    statusLabel.Size = UDim2.new(0, 400, 0, 260)
-    statusLabel.Position = UDim2.new(0, 10, 0, 10)
-    statusLabel.BackgroundTransparency = 0.4
-    statusLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
-    statusLabel.Font = Enum.Font.SourceSansBold
-    statusLabel.TextSize = 20
-    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-    statusLabel.TextYAlignment = Enum.TextYAlignment.Top
-    statusLabel.Parent = screenGui
-    return statusLabel
-end
-
-local statusLabel = nil
-
-local function updateStatus()
-    if statusLabel then
-        statusLabel.Text =
-            "F1: Fly [" .. (fly_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F2: Unsichtbar [" .. (invis_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F3: Godmode [" .. (godmode_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F4: Speed Boost [" .. (speed_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F5: Ragdoll [" .. (ragdoll_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F6: Super Jump [" .. (superjump_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F7: Mini [" .. (mini_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F8: Big [" .. (big_enabled and "ENABLED" or "DISABLED") .. "]\n" ..
-            "F9: Regenbogen [" .. (rainbow_enabled and "ENABLED" or "DISABLED") .. "]"
-    end
-end
-
+-- Hilfsfunktionen für Features
 local function setInvisibility(character, enabled)
     for _, part in pairs(character:GetDescendants()) do
         if part:IsA("BasePart") then
@@ -113,7 +82,6 @@ local function setBig(character, enabled)
     end
 end
 
-local rainbowConnection = nil
 local function setRainbow(character, enabled)
     if rainbowConnection then
         rainbowConnection:Disconnect()
@@ -137,7 +105,6 @@ local function setRainbow(character, enabled)
     end
 end
 
-local flyConnection = nil
 local function enableFly(root)
     if not bodyGyro then
         bodyGyro = Instance.new("BodyGyro")
@@ -183,11 +150,142 @@ local function disableFly()
     if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
 end
 
+-- GUI erstellen
+local function createGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "FunPowersGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = player.PlayerGui
+
+    local frame = Instance.new("Frame")
+    frame.Name = "MainFrame"
+    frame.Size = UDim2.new(0, 420, 0, 260)
+    frame.Position = UDim2.new(0, 40, 0, 60)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 32, 36)
+    frame.BorderSizePixel = 0
+    frame.BackgroundTransparency = 0.05
+    frame.AnchorPoint = Vector2.new(0,0)
+    frame.Parent = screenGui
+
+    local uicorner = Instance.new("UICorner", frame)
+    uicorner.CornerRadius = UDim.new(0, 16)
+
+    local title = Instance.new("TextLabel")
+    title.Text = "Roblox Fun Powers"
+    title.Size = UDim2.new(1, 0, 0, 38)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundTransparency = 1
+    title.TextColor3 = Color3.fromRGB(255, 215, 0)
+    title.Font = Enum.Font.FredokaOne
+    title.TextSize = 28
+    title.Parent = frame
+
+    local grid = Instance.new("UIGridLayout")
+    grid.CellSize = UDim2.new(0, 190, 0, 48)
+    grid.CellPadding = UDim2.new(0, 10, 0, 10)
+    grid.FillDirection = Enum.FillDirection.Horizontal
+    grid.SortOrder = Enum.SortOrder.LayoutOrder
+    grid.StartCorner = Enum.StartCorner.TopLeft
+    grid.Parent = frame
+    grid.Padding = UDim.new(0, 0)
+
+    grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    grid.VerticalAlignment = Enum.VerticalAlignment.Center
+
+    frame.ClipsDescendants = true
+    grid.Parent = frame
+    grid.SortOrder = Enum.SortOrder.LayoutOrder
+    grid.CellSize = UDim2.new(0, 190, 0, 48)
+    grid.CellPadding = UDim2.new(0, 10, 0, 10)
+
+    -- Buttons anlegen
+    local buttons = {}
+    for i, feat in ipairs(features) do
+        local btn = Instance.new("TextButton")
+        btn.Name = feat.name.."Btn"
+        btn.Size = UDim2.new(0, 190, 0, 48)
+        btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+        btn.TextColor3 = feat.enabled and Color3.fromRGB(20,220,80) or Color3.fromRGB(255,255,255)
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 20
+        btn.Text = string.format("[%s] %s: %s", feat.key, feat.name, feat.enabled and "An" or "Aus")
+        btn.LayoutOrder = i
+        btn.AutoButtonColor = true
+        btn.Parent = frame
+        table.insert(buttons, btn)
+    end
+
+    -- Button-Click-Logik
+    local function updateButtons()
+        for i, btn in ipairs(buttons) do
+            local feat = features[i]
+            btn.Text = string.format("[%s] %s: %s", feat.key, feat.name, feat.enabled and "An" or "Aus")
+            btn.TextColor3 = feat.enabled and Color3.fromRGB(20,220,80) or Color3.fromRGB(255,255,255)
+            btn.BackgroundColor3 = feat.enabled and Color3.fromRGB(30,60,30) or Color3.fromRGB(40,40,40)
+        end
+    end
+
+    for i, btn in ipairs(buttons) do
+        btn.MouseButton1Click:Connect(function()
+            features[i].enabled = not features[i].enabled
+            updateButtons()
+            -- Feature-Logik anwenden
+            local character = player.Character
+            if not character then return end
+            local humanoid = character:FindFirstChild("Humanoid")
+            if features[i].name == "Fly" then
+                if features[i].enabled then
+                    enableFly(character.HumanoidRootPart)
+                    humanoid.PlatformStand = true
+                else
+                    disableFly()
+                    humanoid.PlatformStand = false
+                end
+            elseif features[i].name == "Unsichtbar" then
+                setInvisibility(character, features[i].enabled)
+            elseif features[i].name == "Godmode" then
+                if features[i].enabled then
+                    humanoid.MaxHealth = math.huge
+                    humanoid.Health = math.huge
+                else
+                    humanoid.MaxHealth = 100
+                    humanoid.Health = 100
+                end
+            elseif features[i].name == "Speed Boost" then
+                setSpeed(humanoid, features[i].enabled)
+            elseif features[i].name == "Ragdoll" then
+                setRagdoll(character, features[i].enabled)
+            elseif features[i].name == "Super Jump" then
+                setSuperJump(humanoid, features[i].enabled)
+            elseif features[i].name == "Mini" then
+                features[7].enabled = true
+                features[8].enabled = false
+                setMini(character, true)
+                setBig(character, false)
+                updateButtons()
+            elseif features[i].name == "Big" then
+                features[8].enabled = true
+                features[7].enabled = false
+                setBig(character, true)
+                setMini(character, false)
+                updateButtons()
+            elseif features[i].name == "Regenbogen" then
+                setRainbow(character, features[i].enabled)
+            end
+        end)
+    end
+
+    updateButtons()
+    return screenGui
+end
+
+-- Feature-Logik beim Spawn anwenden
 local function setupCharacter(character)
     local humanoid = character:WaitForChild("Humanoid")
     local root = character:WaitForChild("HumanoidRootPart")
 
-    if godmode_enabled then
+    -- Godmode
+    if features[3].enabled then
         humanoid.MaxHealth = math.huge
         humanoid.Health = math.huge
     else
@@ -196,23 +294,23 @@ local function setupCharacter(character)
     end
 
     humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-        if godmode_enabled and humanoid.Health < humanoid.MaxHealth then
+        if features[3].enabled and humanoid.Health < humanoid.MaxHealth then
             humanoid.Health = humanoid.MaxHealth
         end
     end)
 
-    setInvisibility(character, invis_enabled)
-    setSpeed(humanoid, speed_enabled)
-    setRagdoll(character, ragdoll_enabled)
-    setSuperJump(humanoid, superjump_enabled)
-    if mini_enabled then
+    setInvisibility(character, features[2].enabled)
+    setSpeed(humanoid, features[4].enabled)
+    setRagdoll(character, features[5].enabled)
+    setSuperJump(humanoid, features[6].enabled)
+    if features[7].enabled then
         setMini(character, true)
-    elseif big_enabled then
+    elseif features[8].enabled then
         setBig(character, true)
     end
-    setRainbow(character, rainbow_enabled)
+    setRainbow(character, features[9].enabled)
 
-    if fly_enabled then
+    if features[1].enabled then
         enableFly(root)
         humanoid.PlatformStand = true
     else
@@ -221,73 +319,12 @@ local function setupCharacter(character)
     end
 end
 
-UserInputService.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    local character = player.Character
-    if not character then return end
-    local humanoid = character:FindFirstChild("Humanoid")
+-- GUI nur einmal erstellen
+local gui = createGui()
 
-    if input.KeyCode == Enum.KeyCode.F1 then
-        fly_enabled = not fly_enabled
-        if fly_enabled then
-            enableFly(character.HumanoidRootPart)
-            humanoid.PlatformStand = true
-        else
-            disableFly()
-            humanoid.PlatformStand = false
-        end
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F2 then
-        invis_enabled = not invis_enabled
-        setInvisibility(character, invis_enabled)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F3 then
-        godmode_enabled = not godmode_enabled
-        if godmode_enabled then
-            humanoid.MaxHealth = math.huge
-            humanoid.Health = math.huge
-        else
-            humanoid.MaxHealth = 100
-            humanoid.Health = 100
-        end
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F4 then
-        speed_enabled = not speed_enabled
-        setSpeed(humanoid, speed_enabled)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F5 then
-        ragdoll_enabled = not ragdoll_enabled
-        setRagdoll(character, ragdoll_enabled)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F6 then
-        superjump_enabled = not superjump_enabled
-        setSuperJump(humanoid, superjump_enabled)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F7 then
-        mini_enabled = not mini_enabled
-        big_enabled = false
-        setMini(character, mini_enabled)
-        setBig(character, false)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F8 then
-        big_enabled = not big_enabled
-        mini_enabled = false
-        setBig(character, big_enabled)
-        setMini(character, false)
-        updateStatus()
-    elseif input.KeyCode == Enum.KeyCode.F9 then
-        rainbow_enabled = not rainbow_enabled
-        setRainbow(character, rainbow_enabled)
-        updateStatus()
-    end
-end)
-
+-- Charakter-Setup nach Respawn
 local function onCharacterAdded(character)
     setupCharacter(character)
-    if not statusLabel then
-        statusLabel = createStatusGui()
-    end
-    updateStatus()
 end
 
 player.CharacterAdded:Connect(onCharacterAdded)
