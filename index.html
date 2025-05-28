@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Roblox Fun Powers Menü</title>
+  <style>
+    body {
+      background: #181A1B;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #232526;
+      border-radius: 12px;
+      box-shadow: 0 0 20px #0008;
+      padding: 32px;
+    }
+    h1 {
+      color: #FFD700;
+      letter-spacing: 2px;
+      margin-bottom: 0;
+    }
+    .feature-list {
+      margin: 24px 0;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .feature-list th, .feature-list td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #333;
+    }
+    .feature-list th {
+      color: #FFD700;
+      font-weight: bold;
+      background: #232526;
+    }
+    .feature-list td {
+      color: #fff;
+    }
+    .code-block {
+      background: #111315;
+      color: #FFD700;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      font-size: 13px;
+      padding: 18px;
+      border-radius: 8px;
+      margin: 18px 0;
+      overflow-x: auto;
+      word-break: break-all;
+    }
+    .copy-btn {
+      background: #FFD700;
+      color: #232526;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 18px;
+      float: right;
+      transition: background 0.2s;
+    }
+    .copy-btn:active {
+      background: #bfa100;
+    }
+    .info {
+      color: #aaa;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    .key {
+      background: #FFD700;
+      color: #232526;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      margin-right: 4px;
+    }
+    @media (max-width: 700px) {
+      .container {padding: 8px;}
+      .feature-list th, .feature-list td {font-size: 13px;}
+      .code-block {font-size: 12px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Roblox Fun Powers Menü</h1>
+    <p>Füge den untenstehenden Lua-Code als <b>LocalScript</b> in <b>StarterPlayerScripts</b> in Roblox Studio ein.<br>
+    <span style="color:#FFD700;">Drücke die F-Tasten im Spiel, um die Features zu aktivieren!</span></p>
+
+    <table class="feature-list">
+      <tr>
+        <th>Taste</th>
+        <th>Feature</th>
+        <th>Status</th>
+      </tr>
+      <tr><td><span class="key">F1</span></td><td>Fly</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F2</span></td><td>Unsichtbar</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F3</span></td><td>Godmode</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F4</span></td><td>Speed Boost</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F5</span></td><td>Ragdoll</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F6</span></td><td>Super Jump</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F7</span></td><td>Mini-Charakter</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F8</span></td><td>Riesig</td><td>an/aus</td></tr>
+      <tr><td><span class="key">F9</span></td><td>Regenbogen-Charakter</td><td>an/aus</td></tr>
+    </table>
+
+    <button class="copy-btn" onclick="copyCode()">Lua-Code kopieren</button>
+    <div class="code-block" id="luacode">
+-- Roblox Fun Powers LocalScript
+-- (Den Lua-Code findest du weiter unten als eigenen Block!)
+    </div>
+    <div class="info">
+      <b>Hinweis:</b> Dieses Skript funktioniert nur als <b>LocalScript</b> in Roblox Studio und <b>nicht im Browser</b>!<br>
+      Die GitHub Page ist nur zum Anzeigen/Kopieren gedacht.
+    </div>
+  </div>
+  <script>
+    // Hole den echten Lua-Code per fetch oder direkt als String
+    // Hier als Beispiel: Du ersetzt das unten mit deinem echten Lua-Code!
+    const realLuaCode = `
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+local fly_enabled = false
+local godmode_enabled = false
+local invis_enabled = false
+local speed_enabled = false
+local ragdoll_enabled = false
+local superjump_enabled = false
+local mini_enabled = false
+local big_enabled = false
+local rainbow_enabled = false
+
+local flySpeed = 60
+local speedBoost = 100
+local superJumpPower = 200
+local normalJumpPower = 50
+local bodyGyro, bodyVelocity = nil, nil
+
+local function createStatusGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "StatusGui"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = player.PlayerGui
+
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "StatusLabel"
+    statusLabel.Size = UDim2.new(0, 400, 0, 260)
+    statusLabel.Position = UDim2.new(0, 10, 0, 10)
+    statusLabel.BackgroundTransparency = 0.4
+    statusLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    statusLabel.TextColor3 = Color3.fromRGB(255,255,255)
+    statusLabel.Font = Enum.Font.SourceSansBold
+    statusLabel.TextSize = 20
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.TextYAlignment = Enum.TextYAlignment.Top
+    statusLabel.Parent = screenGui
+    return statusLabel
+end
+
+local statusLabel = nil
+
+local function updateStatus()
+    if statusLabel then
+        statusLabel.Text =
+            "F1: Fly [" .. (fly_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F2: Unsichtbar [" .. (invis_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F3: Godmode [" .. (godmode_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F4: Speed Boost [" .. (speed_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F5: Ragdoll [" .. (ragdoll_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F6: Super Jump [" .. (superjump_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F7: Mini [" .. (mini_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F8: Big [" .. (big_enabled and "ENABLED" or "DISABLED") .. "]\\n" ..
+            "F9: Regenbogen [" .. (rainbow_enabled and "ENABLED" or "DISABLED") .. "]"
+    end
+end
+
+local function setInvisibility(character, enabled)
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.LocalTransparencyModifier = enabled and 0.8 or 0
+            if part.Name == "Head" then
+                local face = part:FindFirstChildOfClass("Decal")
+                if face then
+                    face.Transparency = enabled and 1 or 0
+                end
+            end
+        elseif part:IsA("Accessory") then
+            for _, handle in pairs(part:GetChildren()) do
+                if handle:IsA("BasePart") then
+                    handle.LocalTransparencyModifier = enabled and 0.8 or 0
+                end
+            end
+        end
+    end
+end
+
+local function setSpeed(humanoid, enabled)
+    humanoid.WalkSpeed = enabled and speedBoost or 16
+end
+
+local function setRagdoll(character, enabled)
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        if enabled then
+            humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+        else
+            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
+end
+
+local function setSuperJump(humanoid, enabled)
+    humanoid.JumpPower = enabled and superJumpPower or normalJumpPower
+end
+
+local function setMini(character, enabled)
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Size = enabled and (part.Size * 0.5) or (part.Size * 2)
+        end
+    end
+end
+
+local function setBig(character, enabled)
+    for _, part in pairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.Size = enabled and (part.Size * 2) or (part.Size * 0.5)
+        end
+    end
+end
+
+local rainbowConnection = nil
+local function setRainbow(character, enabled)
+    if rainbowConnection then
+        rainbowConnection:Disconnect()
+        rainbowConnection = nil
+    end
+    if enabled then
+        rainbowConnection = RunService.RenderStepped:Connect(function()
+            local t = tick()
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Color = Color3.fromHSV((t*0.2)%1,1,1)
+                end
+            end
+        end)
+    else
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.Color = Color3.fromRGB(163, 162, 165)
+            end
+        end
+    end
+end
+
+local flyConnection = nil
+local function enableFly(root)
+    if not bodyGyro then
+        bodyGyro = Instance.new("BodyGyro")
+        bodyGyro.D = 10
+        bodyGyro.P = 10000
+        bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
+        bodyGyro.Parent = root
+    end
+    if not bodyVelocity then
+        bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bodyVelocity.Parent = root
+    end
+    flyConnection = RunService.RenderStepped:Connect(function()
+        local camera = workspace.CurrentCamera
+        bodyGyro.CFrame = camera.CFrame
+        local moveVec = Vector3.new()
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            moveVec = moveVec + camera.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            moveVec = moveVec - camera.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+            moveVec = moveVec - camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+            moveVec = moveVec + camera.CFrame.RightVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            moveVec = moveVec + Vector3.new(0,1,0)
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+            moveVec = moveVec - Vector3.new(0,1,0)
+        end
+        bodyVelocity.Velocity = moveVec.Magnitude > 0 and moveVec.Unit * flySpeed or Vector3.new(0,0,0)
+    end)
+end
+
+local function disableFly()
+    if flyConnection then flyConnection:Disconnect() flyConnection = nil end
+    if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
+    if bodyVelocity then bodyVelocity:Destroy() bodyVelocity = nil end
+end
+
+local function setupCharacter(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    local root = character:WaitForChild("HumanoidRootPart")
+
+    if godmode_enabled then
+        humanoid.MaxHealth = math.huge
+        humanoid.Health = math.huge
+    else
+        humanoid.MaxHealth = 100
+        humanoid.Health = 100
+    end
+
+    humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+        if godmode_enabled and humanoid.Health < humanoid.MaxHealth then
+            humanoid.Health = humanoid.MaxHealth
+        end
+    end)
+
+    setInvisibility(character, invis_enabled)
+    setSpeed(humanoid, speed_enabled)
+    setRagdoll(character, ragdoll_enabled)
+    setSuperJump(humanoid, superjump_enabled)
+    if mini_enabled then
+        setMini(character, true)
+    elseif big_enabled then
+        setBig(character, true)
+    end
+    setRainbow(character, rainbow_enabled)
+
+    if fly_enabled then
+        enableFly(root)
+        humanoid.PlatformStand = true
+    else
+        disableFly()
+        humanoid.PlatformStand = false
+    end
+end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    local character = player.Character
+    if not character then return end
+    local humanoid = character:FindFirstChild("Humanoid")
+
+    if input.KeyCode == Enum.KeyCode.F1 then
+        fly_enabled = not fly_enabled
+        if fly_enabled then
+            enableFly(character.HumanoidRootPart)
+            humanoid.PlatformStand = true
+        else
+            disableFly()
+            humanoid.PlatformStand = false
+        end
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F2 then
+        invis_enabled = not invis_enabled
+        setInvisibility(character, invis_enabled)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F3 then
+        godmode_enabled = not godmode_enabled
+        if godmode_enabled then
+            humanoid.MaxHealth = math.huge
+            humanoid.Health = math.huge
+        else
+            humanoid.MaxHealth = 100
+            humanoid.Health = 100
+        end
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F4 then
+        speed_enabled = not speed_enabled
+        setSpeed(humanoid, speed_enabled)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F5 then
+        ragdoll_enabled = not ragdoll_enabled
+        setRagdoll(character, ragdoll_enabled)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F6 then
+        superjump_enabled = not superjump_enabled
+        setSuperJump(humanoid, superjump_enabled)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F7 then
+        mini_enabled = not mini_enabled
+        big_enabled = false
+        setMini(character, mini_enabled)
+        setBig(character, false)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F8 then
+        big_enabled = not big_enabled
+        mini_enabled = false
+        setBig(character, big_enabled)
+        setMini(character, false)
+        updateStatus()
+    elseif input.KeyCode == Enum.KeyCode.F9 then
+        rainbow_enabled = not rainbow_enabled
+        setRainbow(character, rainbow_enabled)
+        updateStatus()
+    end
+end)
+
+local function onCharacterAdded(character)
+    setupCharacter(character)
+    if not statusLabel then
+        statusLabel = createStatusGui()
+    end
+    updateStatus()
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+if player.Character then
+    onCharacterAdded(player.Character)
+end
+    `.trim();
+
+    document.getElementById('luacode').innerText = realLuaCode;
+
+    function copyCode() {
+      navigator.clipboard.writeText(realLuaCode).then(function() {
+        const btn = document.querySelector('.copy-btn');
+        btn.innerText = "Kopiert!";
+        setTimeout(() => btn.innerText = "Lua-Code kopieren", 1500);
+      });
+    }
+  </script>
+</body>
+</html>
